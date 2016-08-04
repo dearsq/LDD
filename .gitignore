@@ -1,0 +1,6 @@
+
+# no .a    no  .o  files
+*.[oa]
+
+# no temp file
+*~
