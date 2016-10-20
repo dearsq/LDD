@@ -64,6 +64,28 @@ static long globalfifo_ioctl(struct file * filp, unsigned int cmd, unsigned long
 	return 0;
 }
 
+static unsigned int globalfifo_poll(struct file *filp, poll_table * wait)
+{
+    unsigned int mask = 0;
+    struct globalfifo_dev *dev = filp->private_data;
+
+    mutex_lock(&dev->mutex);
+
+    poll_wait(filp, &dev->r_wait, wait);
+    poll_wait(filp, &dev->w_wait, wait);
+
+    if(dev->current_len != 0)
+    {
+        mask |= POLLIN | POLLRDNORM;
+    }
+    if(dev->current_len != GLOBALFIFO_SIZE)
+    {
+        mask |= POLLOUT | POLLWRNORM;
+    }
+
+    mutex_unlock(&dev->mutex);
+    return mask;
+}
 
 /* 读写函数 */
 static ssize_t globalfifo_read(struct file *filp, char __user * buf, size_t count, loff_t * ppos)
@@ -207,6 +229,7 @@ static loff_t globalfifo_llseek(struct file *filp, loff_t offset, int orig)	//or
 static const struct file_operations globalfifo_fops =  {
 	.owner	=	THIS_MODULE,
 	//.llseek	=	globalfifo_llseek,
+    .poll   =   globalfifo_pol
 	.read	=	globalfifo_read,
 	.write	=	globalfifo_write,
 	.unlocked_ioctl = globalfifo_ioctl,
