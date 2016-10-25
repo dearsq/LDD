@@ -1,5 +1,5 @@
 #include <sys/types.h>
-#include <unistd.h>
+#include <unistd.h>	
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdio.h>d
@@ -21,14 +21,14 @@ void main(void)
 		if (ioctl(fd, FIFO_CLEAR, 0) < 0)
 			printf("ioctl command failed\n");
 
-		epfd = epoll_create(1);
+		epfd = epoll_create(1);					//创建 epoll 告诉内核需要监听一个 fd
 		if (epfd < 0) {
 			perror("epoll_create()");
 			return;
 		}
 
 		bzero(&ev_globalfifo, sizeof(struct epoll_event));
-		ev_globalfifo.events = EPOLLIN | EPOLLPRI;
+		ev_globalfifo.events = EPOLLIN | EPOLLPRI;					//设置 ev_globalfifo.events 的事件类型为数据可读/紧急数据可读
 
 		err = epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &ev_globalfifo);
 		if (err < 0) {
